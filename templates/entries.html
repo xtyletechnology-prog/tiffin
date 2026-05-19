@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3>Tiffin Entry</h3>
+
+<form method="POST">
+
+    <div class="mb-3">
+
+        <select
+            name="user_id"
+            class="form-control"
+            required
+        >
+
+            <option value="">Select User</option>
+
+            {% for user in users %}
+
+            <option value="{{ user.id }}">
+                {{ user.name }}
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+    </div>
+
+    <div class="mb-3">
+
+        <input
+            type="date"
+            name="tiffin_date"
+            class="form-control"
+            required
+        >
+
+    </div>
+
+    <div class="form-check">
+
+        <input
+            type="checkbox"
+            name="day_tiffin"
+            class="form-check-input"
+        >
+
+        <label class="form-check-label">
+            Day Tiffin
+        </label>
+
+    </div>
+
+    <div class="form-check">
+
+        <input
+            type="checkbox"
+            name="night_tiffin"
+            class="form-check-input"
+        >
+
+        <label class="form-check-label">
+            Night Tiffin
+        </label>
+
+    </div>
+
+    <br>
+
+    <button class="btn btn-success">
+        Save Entry
+    </button>
+
+</form>
+
+<hr>
+
+<table class="table table-bordered">
+
+    <tr>
+        <th>Name</th>
+        <th>Date</th>
+        <th>Day</th>
+        <th>Night</th>
+    </tr>
+
+    {% for item in entries %}
+
+    <tr>
+
+        <td>{{ item.user.name }}</td>
+
+        <td>{{ item.tiffin_date }}</td>
+
+        <td>
+            {{ "Yes" if item.day_tiffin else "No" }}
+        </td>
+
+        <td>
+            {{ "Yes" if item.night_tiffin else "No" }}
+        </td>
+
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+{% endblock %}

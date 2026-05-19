@@ -1,0 +1,204 @@
+<!-- templates/reports.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card card-box p-3 p-md-4">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+
+        <h3 class="mb-3 mb-md-0">
+            Reports
+        </h3>
+
+    </div>
+
+    <form method="GET">
+
+        <div class="row g-3">
+
+            <div class="col-12 col-md-3">
+
+                <label class="form-label">
+                    Start Date
+                </label>
+
+                <input
+                    type="date"
+                    name="start_date"
+                    class="form-control"
+                    value="{{ request.args.get('start_date', '') }}"
+                >
+
+            </div>
+
+            <div class="col-12 col-md-3">
+
+                <label class="form-label">
+                    End Date
+                </label>
+
+                <input
+                    type="date"
+                    name="end_date"
+                    class="form-control"
+                    value="{{ request.args.get('end_date', '') }}"
+                >
+
+            </div>
+
+            <div class="col-12 col-md-3 d-grid">
+
+                <label class="form-label d-none d-md-block">
+                    &nbsp;
+                </label>
+
+                <button class="btn btn-primary custom-btn">
+                    Filter
+                </button>
+
+            </div>
+
+            <div class="col-12 col-md-3 d-grid">
+
+                <label class="form-label d-none d-md-block">
+                    &nbsp;
+                </label>
+
+                <a
+                    href="{{ url_for(
+                        'download_report',
+                        start_date=request.args.get('start_date'),
+                        end_date=request.args.get('end_date')
+                    ) }}"
+                    class="btn btn-success custom-btn"
+                >
+                    Download Excel
+                </a>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+<div class="row mt-4 g-3">
+
+    <div class="col-12 col-md-6">
+
+        <div class="card card-box p-4 text-center">
+
+            <h5>Total Day Tiffin</h5>
+
+            <h1 class="mt-2">
+                {{ total_day }}
+            </h1>
+
+        </div>
+
+    </div>
+
+    <div class="col-12 col-md-6">
+
+        <div class="card card-box p-4 text-center">
+
+            <h5>Total Night Tiffin</h5>
+
+            <h1 class="mt-2">
+                {{ total_night }}
+            </h1>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="card card-box p-3 mt-4">
+
+    <div class="table-responsive">
+
+        <table class="table table-bordered table-hover align-middle mb-0">
+
+            <thead class="table-dark">
+
+                <tr>
+
+                    <th>Name</th>
+
+                    <th>Date</th>
+
+                    <th>Day</th>
+
+                    <th>Night</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for item in entries %}
+
+                <tr>
+
+                    <td>
+                        {{ item.user.name }}
+                    </td>
+
+                    <td>
+                        {{ item.tiffin_date.strftime("%d-%m-%Y") }}
+                    </td>
+
+                    <td>
+
+                        {% if item.day_tiffin %}
+
+                            <span class="badge bg-success">
+                                Yes
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-danger">
+                                No
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        {% if item.night_tiffin %}
+
+                            <span class="badge bg-success">
+                                Yes
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-danger">
+                                No
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

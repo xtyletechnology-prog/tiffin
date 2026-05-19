@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3>Add User</h3>
+
+<form method="POST">
+
+    <div class="mb-3">
+        <input
+            type="text"
+            name="name"
+            class="form-control"
+            placeholder="Name"
+            required
+        >
+    </div>
+
+    <div class="mb-3">
+        <input
+            type="text"
+            name="mobile"
+            class="form-control"
+            placeholder="Mobile"
+        >
+    </div>
+
+    <div class="mb-3">
+        <textarea
+            name="address"
+            class="form-control"
+            placeholder="Address"
+        ></textarea>
+    </div>
+
+    <button class="btn btn-primary">
+        Add User
+    </button>
+
+</form>
+
+<hr>
+
+<table class="table table-bordered">
+
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Mobile</th>
+        <th>Address</th>
+    </tr>
+
+    {% for user in users %}
+
+    <tr>
+        <td>{{ user.id }}</td>
+        <td>{{ user.name }}</td>
+        <td>{{ user.mobile }}</td>
+        <td>{{ user.address }}</td>
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+{% endblock %}

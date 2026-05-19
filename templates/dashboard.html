@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row">
+
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h4>Total Users</h4>
+            <h2>{{ total_users }}</h2>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h4>Total Day Tiffin</h4>
+            <h2>{{ total_day }}</h2>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h4>Total Night Tiffin</h4>
+            <h2>{{ total_night }}</h2>
+        </div>
+    </div>
+
+</div>
+
+<hr>
+
+<h4>Recent Entries</h4>
+
+<table class="table table-bordered">
+
+    <tr>
+        <th>Name</th>
+        <th>Date</th>
+        <th>Day</th>
+        <th>Night</th>
+    </tr>
+
+    {% for item in recent_entries %}
+
+    <tr>
+        <td>{{ item.user.name }}</td>
+        <td>{{ item.tiffin_date }}</td>
+        <td>{{ "Yes" if item.day_tiffin else "No" }}</td>
+        <td>{{ "Yes" if item.night_tiffin else "No" }}</td>
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+{% endblock %}
