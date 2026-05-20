@@ -1,3 +1,5 @@
+# app.py
+
 from flask import Flask, render_template, request, redirect, url_for, send_file, flash
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
@@ -6,7 +8,7 @@ import pandas as pd
 import os
 
 # =========================
-# LOAD ENV
+# LOAD ENV FILE
 # =========================
 
 load_dotenv()
@@ -17,10 +19,27 @@ load_dotenv()
 
 app = Flask(__name__)
 
-app.secret_key = os.getenv("SECRET_KEY", "secret123")
+app.secret_key = os.getenv(
+    "SECRET_KEY",
+    "secret123"
+)
 
-# SUPABASE POSTGRESQL DATABASE
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+# =========================
+# DATABASE CONFIG
+# =========================
+
+database_url = os.getenv("DATABASE_URL")
+
+# FIX FOR RENDER
+if database_url.startswith("postgres://"):
+
+    database_url = database_url.replace(
+        "postgres://",
+        "postgresql://",
+        1
+    )
+
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -31,9 +50,13 @@ db = SQLAlchemy(app)
 # =========================
 
 class User(db.Model):
+
     __tablename__ = "users"
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
 
     name = db.Column(
         db.String(200),
@@ -55,6 +78,7 @@ class User(db.Model):
 
 
 class TiffinEntry(db.Model):
+
     __tablename__ = "tiffin_entries"
 
     id = db.Column(
@@ -90,13 +114,22 @@ class TiffinEntry(db.Model):
 
     user = db.relationship("User")
 
-
 # =========================
-# CREATE TABLES
+# CREATE DATABASE TABLES
 # =========================
 
-with app.app_context():
-    db.create_all()
+try:
+
+    with app.app_context():
+
+        db.create_all()
+
+        print("Database Connected Successfully")
+
+except Exception as e:
+
+    print("DATABASE ERROR")
+    print(e)
 
 # =========================
 # DASHBOARD
@@ -127,7 +160,6 @@ def dashboard():
         recent_entries=recent_entries
     )
 
-
 # =========================
 # USERS
 # =========================
@@ -138,7 +170,9 @@ def users():
     if request.method == "POST":
 
         name = request.form.get("name")
+
         mobile = request.form.get("mobile")
+
         address = request.form.get("address")
 
         user = User(
@@ -148,14 +182,17 @@ def users():
         )
 
         db.session.add(user)
+
         db.session.commit()
 
         flash(
-            "User added successfully",
+            "User Added Successfully",
             "success"
         )
 
-        return redirect(url_for("users"))
+        return redirect(
+            url_for("users")
+        )
 
     all_users = User.query.order_by(
         User.id.desc()
@@ -165,7 +202,6 @@ def users():
         "users.html",
         users=all_users
     )
-
 
 # =========================
 # TIFFIN ENTRIES
@@ -178,7 +214,9 @@ def entries():
 
     if request.method == "POST":
 
-        user_id = request.form.get("user_id")
+        user_id = request.form.get(
+            "user_id"
+        )
 
         tiffin_date = request.form.get(
             "tiffin_date"
@@ -200,16 +238,18 @@ def entries():
         if existing:
 
             existing.day_tiffin = day_tiffin
+
             existing.night_tiffin = night_tiffin
 
             flash(
-                "Entry updated successfully",
+                "Entry Updated Successfully",
                 "success"
             )
 
         else:
 
             entry = TiffinEntry(
+
                 user_id=user_id,
 
                 tiffin_date=datetime.strptime(
@@ -225,13 +265,15 @@ def entries():
             db.session.add(entry)
 
             flash(
-                "Entry added successfully",
+                "Entry Added Successfully",
                 "success"
             )
 
         db.session.commit()
 
-        return redirect(url_for("entries"))
+        return redirect(
+            url_for("entries")
+        )
 
     all_entries = TiffinEntry.query.order_by(
         TiffinEntry.tiffin_date.desc()
@@ -242,7 +284,6 @@ def entries():
         users=users,
         entries=all_entries
     )
-
 
 # =========================
 # REPORTS
@@ -275,11 +316,13 @@ def reports():
     ).all()
 
     total_day = sum(
-        1 for x in entries if x.day_tiffin
+        1 for x in entries
+        if x.day_tiffin
     )
 
     total_night = sum(
-        1 for x in entries if x.night_tiffin
+        1 for x in entries
+        if x.night_tiffin
     )
 
     return render_template(
@@ -288,7 +331,6 @@ def reports():
         total_day=total_day,
         total_night=total_night
     )
-
 
 # =========================
 # DOWNLOAD EXCEL REPORT
@@ -323,17 +365,21 @@ def download_report():
     data = []
 
     total_day = 0
+
     total_night = 0
 
     for item in entries:
 
         if item.day_tiffin:
+
             total_day += 1
 
         if item.night_tiffin:
+
             total_night += 1
 
         data.append({
+
             "Name": item.user.name,
 
             "Date": item.tiffin_date.strftime(
@@ -354,10 +400,15 @@ def download_report():
         })
 
     # TOTAL ROW
+
     data.append({
+
         "Name": "TOTAL",
+
         "Date": "",
+
         "Day Tiffin": total_day,
+
         "Night Tiffin": total_night
     })
 
@@ -375,10 +426,12 @@ def download_report():
         as_attachment=True
     )
 
-
 # =========================
 # RUN APP
 # =========================
 
 if __name__ == "__main__":
-    app.run(debug=True)
+
+    app.run(
+        debug=True
+    )
