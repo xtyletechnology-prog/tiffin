@@ -284,7 +284,6 @@ def entries():
         users=users,
         entries=all_entries
     )
-
 # =========================
 # REPORTS
 # =========================
@@ -292,16 +291,19 @@ def entries():
 @app.route("/reports")
 def reports():
 
-    start_date = request.args.get(
-        "start_date"
-    )
+    start_date = request.args.get("start_date")
 
-    end_date = request.args.get(
-        "end_date"
-    )
+    end_date = request.args.get("end_date")
 
-    query = TiffinEntry.query
+    user_id = request.args.get("user_id")
 
+    users = User.query.order_by(
+        User.name.asc()
+    ).all()
+
+    query = TiffinEntry.query.join(User)
+
+    # DATE FILTER
     if start_date and end_date:
 
         query = query.filter(
@@ -309,6 +311,13 @@ def reports():
                 start_date,
                 end_date
             )
+        )
+
+    # USER FILTER
+    if user_id:
+
+        query = query.filter(
+            TiffinEntry.user_id == user_id
         )
 
     entries = query.order_by(
@@ -328,6 +337,7 @@ def reports():
     return render_template(
         "reports.html",
         entries=entries,
+        users=users,
         total_day=total_day,
         total_night=total_night
     )
@@ -347,7 +357,15 @@ def download_report():
         "end_date"
     )
 
-    query = TiffinEntry.query
+    user_id = request.args.get(
+        "user_id"
+    )
+
+    query = TiffinEntry.query.join(User)
+
+    # =========================
+    # DATE FILTER
+    # =========================
 
     if start_date and end_date:
 
@@ -358,9 +376,27 @@ def download_report():
             )
         )
 
+    # =========================
+    # USER FILTER
+    # =========================
+
+    if user_id:
+
+        query = query.filter(
+            TiffinEntry.user_id == user_id
+        )
+
+    # =========================
+    # GET ENTRIES
+    # =========================
+
     entries = query.order_by(
         TiffinEntry.tiffin_date.desc()
     ).all()
+
+    # =========================
+    # EXCEL DATA
+    # =========================
 
     data = []
 
@@ -399,7 +435,9 @@ def download_report():
             )
         })
 
+    # =========================
     # TOTAL ROW
+    # =========================
 
     data.append({
 
@@ -412,14 +450,44 @@ def download_report():
         "Night Tiffin": total_night
     })
 
+    # =========================
+    # CREATE DATAFRAME
+    # =========================
+
     df = pd.DataFrame(data)
 
+    # =========================
+    # FILE NAME
+    # =========================
+
     file_name = "tiffin_report.xlsx"
+
+    # IF USER FILTER EXISTS
+    if user_id:
+
+        user = User.query.get(user_id)
+
+        if user:
+
+            safe_name = user.name.replace(
+                " ",
+                "_"
+            )
+
+            file_name = f"{safe_name}_report.xlsx"
+
+    # =========================
+    # SAVE EXCEL
+    # =========================
 
     df.to_excel(
         file_name,
         index=False
     )
+
+    # =========================
+    # DOWNLOAD FILE
+    # =========================
 
     return send_file(
         file_name,

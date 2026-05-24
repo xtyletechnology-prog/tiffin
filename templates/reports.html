@@ -17,6 +17,37 @@
     <form method="GET">
 
         <div class="row g-3">
+            <div class="col-12 col-md-3">
+
+    <label class="form-label">
+        Select User
+    </label>
+
+    <select
+        name="user_id"
+        class="form-select"
+    >
+
+        <option value="">
+            All Users
+        </option>
+
+        {% for user in users %}
+
+        <option
+            value="{{ user.id }}"
+            {% if request.args.get('user_id') == user.id|string %}
+                selected
+            {% endif %}
+        >
+            {{ user.name }}
+        </option>
+
+        {% endfor %}
+
+    </select>
+
+</div>
 
             <div class="col-12 col-md-3">
 
@@ -68,10 +99,11 @@
 
                 <a
                     href="{{ url_for(
-                        'download_report',
-                        start_date=request.args.get('start_date'),
-                        end_date=request.args.get('end_date')
-                    ) }}"
+    'download_report',
+    start_date=request.args.get('start_date'),
+    end_date=request.args.get('end_date'),
+    user_id=request.args.get('user_id')
+) }}"
                     class="btn btn-success custom-btn"
                 >
                     Download Excel
